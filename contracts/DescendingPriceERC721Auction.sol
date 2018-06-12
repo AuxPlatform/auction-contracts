@@ -284,14 +284,14 @@ contract DescendingPriceAuction is AuctionBase, FeeCollector {
 
     uint256 numberOfBlocksElapsed = block.number.sub(startBlock);
 
-    uint256 priceDecrease = numberOfBlocksElapsed.mul(priceDifference.div(blockDifference));
+    uint256 priceDecrease = numberOfBlocksElapsed.mul(priceDifference).div(blockDifference);
 
     return startPrice.sub(priceDecrease);
   }
 
   /**
    * @notice Stores the requisite pricing information for a descending price auction.
-     Takes a 2% cut of the start price
+     'requiresFee' ensures there is enough Ethereum to pay the 2% fee, adds the fee amount to the contract fee balance, and transfers the surplus back to the sender.
    */
   function setAuctionPricing(uint256 startPrice, uint256 priceFloor, uint256 duration, uint256 auctionId) requiresFee(startPrice.div(50)) internal {
     require(startPrice > 0 && priceFloor < startPrice && priceFloor >= 0 && duration > 0);
@@ -440,7 +440,7 @@ contract ERC721Auction is AuctionBase, Whitelistable {
   }
 
   /**
-   * @dev Transfers cat from an auction seller to the auction contract. This requires the auction to have been approved for taking control of the cat.
+   * @dev Transfers ERC721 asset from an auction seller to the auction contract. This requires the auction to have been approved for taking control of the cat.
    */
   function escrowAsset(address seller, address auctionAssetContract, uint256 assetId) private {
     ERC721Basic assetContract = ERC721Basic(auctionAssetContract);
