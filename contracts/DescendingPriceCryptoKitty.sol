@@ -341,7 +341,7 @@ contract DescendingPriceAuction is AuctionBase, FeeCollector {
   /**
    * @notice Should immediately end the auction by transferring the winnings to the bidder, as long as the bid is valid.
    */
-  function bid(uint256 auctionId) whenNotPaused onlyAcceptingBids(auctionId) whenNotPaused external payable {
+  function bid(uint256 auctionId) whenNotPaused onlyAcceptingBids(auctionId) external payable {
     // Bidder must exist
     require(msg.sender != 0x0);
 
@@ -383,14 +383,14 @@ contract DescendingPriceAuction is AuctionBase, FeeCollector {
 
     uint256 numberOfBlocksElapsed = block.number.sub(startBlock);
 
-    uint256 priceDecrease = numberOfBlocksElapsed.mul(priceDifference.div(blockDifference));
+    uint256 priceDecrease = numberOfBlocksElapsed.mul(priceDifference).div(blockDifference);
 
     return startPrice.sub(priceDecrease);
   }
 
   /**
    * @notice Stores the requisite pricing information for a descending price auction.
-     Takes a 2% cut of the start price
+     'requiresFee' ensures there is enough Ethereum to pay the 2% fee, adds the fee amount to the contract fee balance, and transfers the surplus back to the sender.
    */
   function setAuctionPricing(uint256 startPrice, uint256 priceFloor, uint256 duration, uint256 auctionId) requiresFee(startPrice.div(50)) internal {
     require(startPrice > 0 && priceFloor < startPrice && priceFloor >= 0 && duration > 0);
